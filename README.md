@@ -8,19 +8,26 @@ sengokuixa-meta
 動作確認
 --------
 
-* Firefox31esr + Scriptish0.1.11
+* Firefox38esr + Scriptish0.1.11
 
 インストール
 ------------
 
 * このツールを使用するには[Scriptish](https://addons.mozilla.org/ja/firefox/addon/scriptish/)を事前にインストールしておく必要があります
-* y鯖最新版のインストールは[ここ](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta.user.js)をクリック
-* hm鯖最新版のインストールは[ここ](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta-hm.user.js)をクリック
+* 最新版のインストールは[ここ](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta.user.js)をクリック
 * mixiは期と章が取得できないので、[こちら](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/mixi-support.user.js)も合わせてインストールしてください
  - ログイン後、家紋をクリックすると期と章を尋ねられますので入力すると地図画面での不具合が治ると思います
 
 更新履歴
 --------
+
+### 1.5.1.1
+2015/11/25
+* スキル連続強化機能を追加
+ - とりあえず兵士編成画面でのみ確認
+ - 兵士編成画面での武将選択数の上限を撤廃
+* hm鯖版と統合
+ - hm03鯖だけは刷新まで対象外
 
 ### 1.5.1.0
 2015/11/15
