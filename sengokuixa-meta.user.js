@@ -4551,130 +4551,6 @@ panelUnionSlot: function( $panel ) {
 	.trigger('update');
 },
 
-//.. dialogUnionKeep
-dialogUnionKeep: function( cid, added_list ) {
-	var card = Deck.getCard( cid ),
-		html, $content;
-
-	html = '';
-	html += '<div style="float:left; width:240px; text-align:right; padding-right: 2px;">';
-	html += '<img src="' + Env.externalFilePath + '/img/card/deck/' + card.image + '" />';
-	html += '</div>';
-	html += '<div style="float:left; width:240px; text-align: left; padding-left: 2px; padding-top:28px;">';
-	html += '<table class="common_table1">';
-	html += '<tr><th>目標</th><th>スキル</th></tr>';
-	html += '<tr><td><input type=number id=skill0 max=10 size=2 min=' + card.skillList[0].lv + ' value=' + card.skillList[0].lv + '></td><td>' + card.skillList[0].originName + '</td></tr>';
-	if( card.skillList.length > 1 ) {
-	html += '<tr><td><input type=number id=skill1 max=10 size=2 min=' + card.skillList[1].lv + ' value=' + card.skillList[1].lv + '></td><td>' + card.skillList[1].originName + '</td></tr>';
-	}
-	else {
-	html += '<tr><td><input type=number id=skill1 max=10 size=2 disabled value=0></td><td>---</td></tr>';
-	}
-	if( card.skillList.length > 2 ) {
-	html += '<tr><td><input type=number id=skill2 max=10 size=2 min=' + card.skillList[2].lv + ' value=' + card.skillList[2].lv + '></td><td>' + card.skillList[2].originName + '</td></tr>';
-	}
-	else {
-	html += '<tr><td><input type=number id=skill2 max=10 size=2 disabled value=0></td><td>---</td></tr>';
-	}
-	html += '</table>';
-	html += '</div>';
-	html += '<div style="clear:both; text-align:center; padding:1em;">選択カード枚数：' + added_list.length + '</div>';
-
-	$content = $( html );
-
-	dialog = Display.dialog({
-		title: '連続強化合成',
-		content: $content,
-		width: 500,
-		height: 340,
-		//top: 5, width: 320, height: 'auto',
-		buttons: {
-		'銅銭': function() {
-			//let ol = Display.dialog();
-			skillUp( this, cid, added_list, [$('#skill0').val(), $('#skill1').val(), $('#skill2').val()], 0 )
-			.done( function() {
-				$.noop();
-			});
-		},
-		'金'  : function() {
-			skillUp( this, cid, added_list, [$('#skill0').val(), $('#skill1').val(), $('#skill2').val()], 1 )
-			.done( function() {
-				$.noop();
-			});
-		},
-		'閉じる': function() { this.close(); },
-		}
-	});
-
-	function skillUp( dlg, cid, added_list, tlv, cp_flg ) {
-		var d = $.Deferred();
-		
-		var card = Deck.getCard( cid );
-		// レベルアップ対象のスキルコードの取得
-		$.post( '/union/union_levelup.php', { base_cid: cid, added_cid: added_list[0], union_type: 1 } )
-        .done( function( html ) {
-			var $form = $(html).find('form#select_skill_form');
-
-			var skills = [
-				{level: 0, code: '', t: 0},
-				{level: 0, code: '', t: 0},
-				{level: 0, code: '', t: 0}
-				];
-
-			for( var s = 0; s < card.skillList.length; s++ ) {
-				let sobj = $form.find( 'tr:has(:contains("' + card.skillList[s].name + '"))' );
-				if( !$.isEmptyObject( sobj ) ) {
-					skills[s] = {level: sobj.html().match( /LV(\d+)/ )[1], code: sobj.find('input#selected_skill_radio').prop('value'), t: tlv[s] };
-				}
-				else {
-					dlg.message( card.skillList[s].name + 'が見つからない？' );
-					d.resolve(); //reject();
-				}
-			}
-
-			// 対象スキルの抽出
-			// 目標Lvより現Lvが低いこと
-			var selected = skills.filter( function( o ) {
-				return ( o.t.toInt() > o.level.toInt() );
-			} );
-
-			selected.sort( function( a, b ) {
-				return ( b.t - b.level ) - ( a.t - a.level );
-			} );
-
-			// 対象スキルがあったらレベルアップ処理
-			if( selected.length > 0 ) {
-				var postData = {
-					base_cid            : cid,
-					added_cid           : added_list[0],
-					selected_skill_radio: selected[0].code,
-					exec_btn:1,
-					sub_id:0,
-					union_type:1,
-					use_cp_flg: cp_flg,
-				};
-
-				$.post( '/union/union_levelup.php', postData )
-				.done( function( html ) {
-					dlg.message( $(html).find('p.mt10.mb10.fs16').html() );
-					added_list.shift();
-					if( added_list.length > 0 ) {
-						skillUp( dlg, cid, added_list, tlv, cp_flg ).done( d.resolve );
-					}
-					else {
-						d.resolve();
-					}
-				});
-			}
-			else {
-				d.resolve();
-			}
-		});
-
-		return d.promise();
-	};
-}
-
 });
 
 //■ Soldier
@@ -10264,7 +10140,12 @@ Deck.dialog = function( village, territory, brigade, coord, ano ) {
 				}
 				else if ( option == '2' ) {
 					Display.dialog().message('ページを更新します...');
-					Map.send( target_x, target_y, village.country, village );
+					if( Env.chapter <= 9 ) {
+						Map.send( target_x, target_y, village.country, village );
+					}
+					else {
+						Map10.send( target_x, target_y, village.country, village );
+					}
 				}
 				else if ( option == '3') {
 					Deck.dialog.loadUnit( 4 ).always(function() {
@@ -11868,6 +11749,138 @@ rankup: function( card_id, added_cid, material_cid ) {
 //.. skillLevelup
 skillLevelup: function( card_id, added_cid, material_cid ) {
 	Card.unionLevelup( 1, card_id, added_cid, material_cid );
+},
+
+//.. skillLevelupSeq  .. スキル連続強化
+skillLevelupSeq: function( card_id, added_cid, material_cid ) {
+	var postData = {
+		ad_id               : 24,
+		add_flg             : '',
+		base_cid            : card_id.toInt(),
+		btn_change_flg      : '',
+		deck_mode           : '',
+		exec_btn            : 1,
+		new_cid             : '',
+		p                   : '',
+		remove_cid          : '',
+		select_card_group   : 0,
+		selected_cid        : '',
+		selected_skill_radio: '',
+		skill_radio         : '',
+		sub_id              : 0,
+		union_type          : 1,
+		use_cp_flg          : 0
+	}
+	var material = new Array;
+	material.unshift( added_cid );
+	material = material.concat( material_cid );
+
+	// 合成スタイルシート
+	var st = Env.externalFilePath + '/css/union_skill_exp.css'
+	$('HEAD').append('<link type="text/css" rel="stylesheet" href="' + st + '">');
+
+	var ol = Display.dialog({
+		title: '連続スキル強化',
+		width: 770,
+		buttons: {
+			'銅銭で合成': function() {
+				var skill = $('#imi_dialog_container').find('#skill_radio:checked').val();
+
+				postData.selected_skill_radio = skill;
+				postData.skill_radio = skill;
+				postData.use_cp_flg = 0;
+
+				var ul = Display.dialog({
+					buttons: { '閉じる': function() { this.close(); } }
+				});
+
+				ol.close();
+
+				$.Deferred().resolve()
+				.pipe( function() {
+					var self = arguments.callee;
+
+					ul.message( '合成素材残り' + material.length + '枚' );
+					if( material.length == 0 ) {
+						return;
+					}
+
+					postData['material_arr[]'] = material.slice(0,10);
+					material.splice(0,10);
+
+					// レベルアップ処理
+					$.post('/union/union_levelup.php', postData )
+					.pipe( function( html ) {
+						var $html = $(html),
+							//$res_detail = $html.find('.new_union_result_detail'),
+							msg, $result_msg;
+
+						// レベルアップしたらスキルコード変更
+						var $success = $html.find('#union_success_animation');
+						if( $success.length ) {
+							var current_radio = postData.selected_skill_radio,
+								lvup = $success.data('loop_count').toInt();
+
+							postData.selected_skill_radio = current_radio.slice( 0, -1 ) + ( current_radio.slice( -1 ).toInt() + lvup );
+
+							var skillname = $success.find('.name').text().trim();
+							if( lvup > 0 ) {
+								skillname = skillname.replace(/(LV\d+)(LV\d+)/, function( m, p1, p2 ) {
+									return 'LV' + p1.match(/\d+/)[0].toInt() + '&nbsp;→&nbsp;LV' + ( p2.match(/\d+/)[0].toInt() + lvup ).toInt();
+								})
+							}
+							msg = '' +
+							$html.find('.new_union_result_para').text() + // 獲得経験値
+							skillname; // スキル名
+						}
+
+						ul.message( msg );
+					})
+					.pipe( function() {
+						self();
+					});
+				});
+			},
+			// '金で合成'  : function() {
+			// 	postData.use_cp_flg = 1;
+			// 	this.close();
+			// },
+			'キャンセル': function() { this.close(); }
+		}
+	});
+	
+	// スキル強化画面の取得
+	$.post( '/union/levelup.php', { selected_cid: card_id, union_type: 1 } )
+	.pipe( function( html ) {
+		var $html = $(html),
+			$table = $html.find('TABLE.skill_list_table.powerup');
+
+		// スキルテーブル .. 総経験値に表記を変更
+		$table.find('TR').map( function() {
+			if( $(this).find('.name > .unregist').length ) return $(this);
+
+			var level    = $(this).find('.name').text().match(/LV(\d+)/)[1].toInt();
+				next_exp = $(this).find('.exp_info > .num').text().toInt();
+			
+			if( !$.isNumeric(level) || !$.isNumeric(next_exp) ) return $(this);
+
+			var exp = necessaryExp( level, next_exp );
+
+			$(this).find('#skill_radio').removeAttr('onclick');
+			$(this).find('.detail > .exp_info')
+			.replaceWith('<div class="exp_info">最大レベルまで<span class="num">' + exp.toFormatNumber() + '</span></div>');
+			$(this).find('.detail > .exp_bar > .num').css('width', ( ( 40000 - exp ) / 40000 ) * 100 +'%')
+
+			return $(this);
+		});
+
+		ol.append( $table );
+	});
+
+	function necessaryExp( lv, next ) {
+		var total = [0,0,300,800,1800,4000,7000,12000,18000,28000,40000];
+		return 40000 - ( total[lv+1] - next );
+	}
 },
 
 //.. skillAdd
@@ -17916,7 +17929,8 @@ unionMode: function() {
 		if ( $this.hasClass('imc_selected') ) {
 			$this.removeClass('imc_selected imc_added');
 		}
-		else if ( len < 10 ) {
+		// else if ( len < 10 ) {
+		else { // スキル連続強化のため上限撤廃
 			var added = $('TR.imc_added').length;
 
 			if ( added == 0 && !data.useSlot2() ) {
@@ -17931,9 +17945,9 @@ unionMode: function() {
 			$this.addClass('imc_selected');
 			if ( added == 0 ) { $this.addClass('imc_added'); }
 		}
-		else {
-			Display.info('これ以上選択できません。');
-		}
+		// else {
+		// 	Display.info('これ以上選択できません。');
+		// }
 	});
 },
 
@@ -18122,6 +18136,7 @@ contextmenu: function() {
 		}
 		if ( card.canSkillLvup() && ( !added_card || added_card.useSkillSlot2() ) ) {
 			menu['スキルを強化する'] = function() { Card.skillLevelup( card_id, added_cid, material_cid ); };
+			menu['スキルを連続で強化する'] = function() { Card.skillLevelupSeq( card_id, added_cid, material_cid ); };
 			separator = true;
 		}
 		if ( card.canSkillAdd() && ( !added_card || added_card.useSkillSlot2() ) ) {
