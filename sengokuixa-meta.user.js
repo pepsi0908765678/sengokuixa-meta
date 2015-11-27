@@ -4,7 +4,8 @@
 // @version        1.5.1.1
 // @namespace      sengokuixa-meta
 // @include        http://*.sengokuixa.jp/*
-// @exclude        http://hm03.sengokuixa.jp/*
+// @exclude        http://hm04.sengokuixa.jp/*
+// @exclude        http://hm05.sengokuixa.jp/*
 // @require        https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
 // @website        https://github.com/moonlit-g/sengokuixa-meta
 // @updateURL      https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta.meta.js
@@ -1621,6 +1622,7 @@ getValidSoldiers: function( facility ) {
 
 	$.ajax({ type: 'get', url: url, async: false })
 	.pipe(function( html ) {
+if( Env.chapter < 11 ) {
 		$(html).find('.ig_tilesection_innermid, .ig_tilesection_innermid2').each(function() {
 			var $this = $(this),
 				name, materials, soldata;
@@ -1640,6 +1642,28 @@ getValidSoldiers: function( facility ) {
 
 			soldiers.push({ type: soldata.type, name: name, materials: materials, training: soldata.training, image: image, order: soldata.order });
 		});
+}  // Env.chapter < 11
+else {
+		$(html).find('#TrainingBlock1 .ig_tilesection_innermid').each(function() {
+			var $this = $(this),
+				name, materials, soldata;
+
+			if ( $this.find('H3').length == 0 ) { return; }
+			if ( $this.find('H3 A').length > 0 ) { return; }
+
+			name = $this.find('H3').text().match(/\[(.*)\]/)[ 1 ];
+			materials = [
+				$this.find('.icon_wood').text().match(/(\d+)/)[ 1 ].toInt(),
+				$this.find('.icon_cotton').text().match(/(\d+)/)[ 1 ].toInt(),
+				$this.find('.icon_iron').text().match(/(\d+)/)[ 1 ].toInt(),
+				$this.find('.icon_food').text().match(/(\d+)/)[ 1 ].toInt()
+			];
+			soldata = Soldier.getByName( name );
+			image = $this.find('.ig_tilesection_iconarea IMG').attr('src');
+
+			soldiers.push({ type: soldata.type, name: name, materials: materials, training: soldata.training, image: image, order: soldata.order });
+		});
+}  // Env.chapter >= 11
 	});
 
 	return soldiers.reverse();
@@ -4682,13 +4706,13 @@ else {
 		'赤備え':   { type: 331, class: 'kiba3', attack: 22, defend: 20, speed: 25, destroy:  1, command: '馬', skillType: '馬', training: [ 130, 105, 85, 69, 56, 45, 37, 30, 25, 21, 17, 14, 12, 10, 9 ], dou: 200, require: ['馬', '槍'], order: 3 },
 		'母衣衆':   { type: 332, class: 'kiba4', attack: 20, defend: 17, speed: 24, destroy:  2, command: '馬', skillType: '馬', training: [], dou:   0, require: ['馬', '馬'], order: 0 },
 		//器
-		'破城鎚':   { type: 333, class: 'heiki1', attack:  3, defend:  8, speed:  8, destroy: 12, command: '器', skillType: '器', training: [ 195, 157, 126, 102,  82, 66, 54, 44, 36, 29, 24, 20, 17, 14, 12 ], dou:  10, require: ['器', '器'], order: 1 },
-		'攻城櫓':   { type: 334, class: 'heiki2', attack: 15, defend:  5, speed: 10, destroy:  8, command: '器', skillType: '器', training: [ 195, 157, 126, 102,  82, 66, 54, 44, 36, 29, 24, 20, 17, 14, 12 ], dou:  10, require: ['器', '器'], order: 2 },
-		'大筒兵':   { type: 335, class: 'heiki3', attack: 10, defend: 12, speed:  8, destroy: 20, command: '器', skillType: '器', training: [ 270, 217, 174, 140, 113, 91, 73, 59, 48, 39, 32, 26, 22, 18, 15 ], dou: 300, require: ['弓', '器'], order: 3 },
-		'鉄砲足軽': { type: 336, class: 'heiki4', attack: 18, defend: 26, speed: 15, destroy:  1, command: '器', skillType: '砲', training: [ 180, 145, 117,  94,  76, 61, 50, 41, 33, 27, 23, 19, 16, 13, 11 ], dou: 200, require: ['槍', '器'], order: 5 },
-		'騎馬鉄砲': { type: 337, class: 'heiki5', attack: 26, defend: 19, speed: 21, destroy:  1, command: '器', skillType: '砲', training: [ 250, 201, 162, 130, 105, 84, 68, 55, 45, 37, 30, 25, 20, 17, 14 ], dou: 300, require: ['馬', '器'], order: 6 },
+		'破城鎚':   { type: 333, class: 'heiki1', attack:  8, defend:  8, speed: 12, destroy: 12, command: '器', skillType: '器', training: [ 195, 157, 126, 102,  82, 66, 54, 44, 36, 29, 24, 20, 17, 14, 12 ], dou:  10, require: ['器', '器'], order: 1 },
+		'攻城櫓':   { type: 334, class: 'heiki2', attack: 15, defend: 10, speed: 13, destroy: 10, command: '器', skillType: '器', training: [ 195, 157, 126, 102,  82, 66, 54, 44, 36, 29, 24, 20, 17, 14, 12 ], dou:  10, require: ['器', '器'], order: 2 },
+		'大筒兵':   { type: 335, class: 'heiki3', attack: 14, defend: 12, speed: 18, destroy: 20, command: '器', skillType: '器', training: [ 270, 217, 174, 140, 113, 91, 73, 59, 48, 39, 32, 26, 22, 18, 15 ], dou: 300, require: ['弓', '器'], order: 3 },
+		'鉄砲足軽': { type: 336, class: 'heiki4', attack: 24, defend: 27, speed: 18, destroy:  1, command: '器', skillType: '砲', training: [ 180, 145, 117,  94,  76, 61, 50, 41, 33, 27, 23, 19, 16, 13, 11 ], dou: 200, require: ['槍', '器'], order: 5 },
+		'騎馬鉄砲': { type: 337, class: 'heiki5', attack: 27, defend: 23, speed: 21, destroy:  1, command: '器', skillType: '砲', training: [ 250, 201, 162, 130, 105, 84, 68, 55, 45, 37, 30, 25, 20, 17, 14 ], dou: 300, require: ['馬', '器'], order: 6 },
 		'雑賀衆':   { type: 338, class: 'heiki6', attack: 23, defend: 18, speed: 18, destroy:  5, command: '器', skillType: '砲', training: [], dou:   0, require: ['槍', '器'], order: 0 },
-		'焙烙火矢': { type: 345, class: 'heiki7', attack: 24, defend: 24, speed: 19, destroy:  2, command: '器', skillType: '砲', training: [ 250, 201, 162, 130, 105, 84, 68, 55, 45, 37, 30, 25, 20, 17, 14 ], dou:  10, require: ['弓', '器'], order: 4 },
+		'焙烙火矢': { type: 345, class: 'heiki7', attack: 25, defend: 25, speed: 19, destroy:  2, command: '器', skillType: '砲', training: [ 250, 201, 162, 130, 105, 84, 68, 55, 45, 37, 30, 25, 20, 17, 14 ], dou:  10, require: ['弓', '器'], order: 4 },
 		//NPC用
 		'浪人':     { defend:  12, command: '槍' },
 		'抜け忍':   { defend:  12, command: '弓' },
@@ -5250,6 +5274,8 @@ countries: (function() {
 		['dummy', '織田家', '鈴木家', '武田家', '上杉家', '徳川家', '毛利家', '浅井家', '北条家', '長宗我部家', '佐竹家', '大友家', '最上家'],
 		//第10章
 		['dummy', '柴田家', '島津家', '前田家', '上杉家', '徳川家', '毛利家', '伊達家', '北条家', '長宗我部家', '佐竹家', '豊臣家', '龍造寺家'],
+		//第11章
+		['dummy', '織田家', '斎藤家', '武田家', '上杉家', '三好家', '毛利家', '最上家', '北条家', '尼子家', '今川家', '大友家', '龍造寺家'],
 	][ Env.chapter ] || [];
 })(),
 
@@ -5410,9 +5436,40 @@ getNpcPower: function() {
 		'8-27213': { '国人衆': 370, '海賊衆': 1105, '雑賀衆': 370, '抜け忍': 2940, '鬼': 735, '天狗': 5 },
 		'8-22702': { '母衣衆': 1575, '野盗': 2950, '鬼': 790, '天狗': 5 },
 		'8-33342': { '鬼': 905, '天狗': 455 }
+	},
+	{
+		// 11章
+		// ★1
+		'1-10100': { '農民': 25, '抜け忍': 5 },
+		'1-00000': { '農民': 25, '野盗': 5 },
+		// ★2
+		'2-00201': { '農民': 20, '浪人':  5, '抜け忍':  5, '野盗': 15 },
+		'2-11020': { '農民': 20, '浪人': 10, '抜け忍': 10, '野盗': 15 },
+		// ★3
+		'3-11110': { '農民': 45, '野盗': 85 },
+		//同じ資源数なので、それぞれの兵科で高い方を採用
+		'3-11110': [2265, 1245, 2265, 1551],
+		// ★4
+		'4-21101': { '雑賀衆': 175, '農民': 525 },
+		'4-13100': { '海賊衆': 140, '農民': 485, '抜け忍': 70 },
+		'4-11310': { '国人衆': 150, '農民': 495, '浪人': 105 },
+		'4-31141': { '母衣衆': 165, '農民': 500, '野盗': 35 },
+		// ★5
+		'5-00000': {},
+		'5-00000': {},
+		'5-00000': {},
+		'5-00000': {},
+		'5-00000': {},
+		'5-00000': {},
+		// ★6
+		'6-00000': {},
+		// ★7
+		'7-00000': {},
+		// ★8
+		'8-00000': {},
 	}];
 
-	data = [ {}, data[0], data[0], data[1], data[1], data[2], data[2], data[2], data[2], data[2], data[2] ][ Env.chapter ] || {};
+	data = [ {}, data[0], data[0], data[1], data[1], data[2], data[2], data[2], data[2], data[2], data[2], data[3] ][ Env.chapter ] || {};
 
 	if ( Env.chapter <= 4 ) {
 		Data.npcPower = data;
@@ -15456,7 +15513,13 @@ style: '' +
 'TR.imc_facility TD { text-align: center; }' +
 'TR.imc_facility TD ~ TD { border-left: solid 1px #fff; }' +
 'BUTTON { position: relative; top: 1px; }' +
-'.ig_tilesection_innerborder_high_speed DIV.ig_tilesection_unit_info { left: 0px; width: 100%; }' +
+( (Env.chapter < 11 ) ?
+'.ig_tilesection_innerborder_high_speed DIV.ig_tilesection_unit_info { left: 0px; width: 100%; }'
+:
+// 11章からは通常、高速、上位とタブに分かれた
+'DIV.ig_tilesection_training_info { border-top: 0 none #000; }' +
+'.paneltable, .paneltableInside, .paneltable_blue, .paneltable_red { border-collapse: separate; }'
+) +
 /* 市用 */
 '.table_tile_market TD IMG { border: solid 2px black; border-radius: 2px; padding: 2px; margin-right: 5px; cursor: pointer; }' +
 '.table_tile_market TD IMG.imc_selected { border-color: #f80; background-color: #860; }' +
@@ -15523,6 +15586,7 @@ training: function( name ) {
 	//説明部分削除
 	$('#ig_tileheadmenu + .ig_top_alartbox').remove();
 
+if( Env.chapter < 11 ) {
 	//兵種表示を逆に
 	var $div = $('.ig_tilesection_mid').eq( 0 ),
 		$innertop = $div.children('DIV:nth-child(3n+1)'),
@@ -15535,6 +15599,7 @@ training: function( name ) {
 		$div.prepend( $innertop.eq( idx ) );
 	});
 
+	// 作成可能兵士数
 	$('.ig_tilesection_mid').eq( 0 ).prepend('<div class="ig_solder_commentarea" />');
 
 	//訓練数の表示、表示幅微調整
@@ -15545,7 +15610,49 @@ training: function( name ) {
 			close = storage.get( key ),
 			$close, html, text;
 
-if( Env.chapter > 8 ) {
+if( Env.chapter < 9 ) {
+		//兵種の説明
+		$this.find('.ig_tile_explain').hide();
+
+		//現在の兵士数表示位置変更
+		text = $this.find('DIV.ig_tilesection_iconarea > P').remove().text() || '';
+		text = ( text.match(/(\d+)/) || [,0] )[1];
+		$this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
+
+		//訓練中の兵士表示
+		if ( list[ name ] ) { $this.append( list[ name ] ); }
+
+		$close = $('<span class="imc_training_button"></span>');
+		$close.click(function() {
+			var $this = $(this),
+				$container = $this.closest('.ig_tilesection_innerborder');
+
+			if ( $this.hasClass('is_open') ) {
+				$this.removeClass('is_open').addClass('is_close');
+				$container.find('.ig_tilesection_iconarea').hide();
+				$container.find('.ig_tilesection_detailarea TABLE').hide();
+				storage.set( key, true );
+			}
+			else {
+				$this.addClass('is_open').removeClass('is_close');
+				$container.find('.ig_tilesection_iconarea').show();
+				$container.find('.ig_tilesection_detailarea TABLE').show();
+				storage.remove( key );
+			}
+		});
+
+		$this.find('H3').append( $close );
+
+		if ( close ) {
+			$close.addClass('is_close');
+			$this.find('.ig_tilesection_iconarea').hide();
+			$this.find('.ig_tilesection_detailarea TABLE').hide();
+		}
+		else {
+			$close.addClass('is_open');
+		}
+}
+else if( Env.chapter < 11 ) {
 		//兵種の説明
 		$this.find('.ig_tile_explain').hide();
 		// 訓練タイプ
@@ -15592,52 +15699,86 @@ if( Env.chapter > 8 ) {
 			$close.addClass('is_open');
 		}
 }
-else {
-		//兵種の説明
-		$this.find('.ig_tile_explain').hide();
-
-		//現在の兵士数表示位置変更
-		text = $this.find('DIV.ig_tilesection_iconarea > P').remove().text() || '';
-		text = ( text.match(/(\d+)/) || [,0] )[1];
-		$this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
-
-		//訓練中の兵士表示
-		if ( list[ name ] ) { $this.append( list[ name ] ); }
-
-		$close = $('<span class="imc_training_button"></span>');
-		$close.click(function() {
-			var $this = $(this),
-				$container = $this.closest('.ig_tilesection_innerborder');
-
-			if ( $this.hasClass('is_open') ) {
-				$this.removeClass('is_open').addClass('is_close');
-				$container.find('.ig_tilesection_iconarea').hide();
-				$container.find('.ig_tilesection_detailarea TABLE').hide();
-				storage.set( key, true );
-			}
-			else {
-				$this.addClass('is_open').removeClass('is_close');
-				$container.find('.ig_tilesection_iconarea').show();
-				$container.find('.ig_tilesection_detailarea TABLE').show();
-				storage.remove( key );
-			}
-		});
-
-		$this.find('H3').append( $close );
-
-		if ( close ) {
-			$close.addClass('is_close');
-			$this.find('.ig_tilesection_iconarea').hide();
-			$this.find('.ig_tilesection_detailarea TABLE').hide();
-		}
-		else {
-			$close.addClass('is_open');
-		}
-}
-
 	});
 
 	this.trainingPulldown( $innermid );
+} // Env.chapter < 11
+else {
+	var blockid; // 1:通常 2:高速 3:上位
+	for( var i = 1; i < 3; i++ ) {
+		var $block = $('#TrainingBlock'+i);
+
+		//兵種表示を逆に
+		var $div = $block.children('.ig_tilesection_mid'),
+			$innertop = $div.children('DIV:nth-child(3n+1)'),
+			$innermid = $div.children('DIV:nth-child(3n+2)'),
+			$innerbottom = $div.children('DIV:nth-child(3n)');
+
+		$innertop.each(function( idx ) {
+			$div.prepend( $innerbottom.eq( idx ) );
+			$div.prepend( $innermid.eq( idx ) );
+			$div.prepend( $innertop.eq( idx ) );
+		});
+
+		// 作成可能兵士数
+		$div.prepend('<div class="ig_solder_commentarea" />');
+
+		//訓練数の表示、表示幅微調整
+		$innermid.each(function() {
+			var $this = $(this),
+				name  = $this.find('H3 B').text().slice(1, -1),
+				key   = '訓練_' + name,
+				close = storage.get( key ),
+				$close, html, text;
+
+			//兵種の説明
+			$this.find('.ig_tile_explain').hide();
+
+			// //現在の兵士数表示位置変更
+			// text = $this.find('DIV.ig_tilesection_iconarea > P').remove().text() || '';
+			// text = ( text.match(/(\d+)/) || [,0] )[1];
+			// $this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
+
+			// //訓練中の兵士表示
+			// if ( list[ name ] ) { $this.append( list[ name ] ); }
+
+			// $close = $('<span class="imc_training_button"></span>');
+			// $close.click(function() {
+			// 	var $this = $(this),
+			// 		$container = $this.closest('.ig_tilesection_innerborder_high_speed,.ig_tilesection_innerborder');
+
+			// 	if ( $this.hasClass('is_open') ) {
+			// 		$this.removeClass('is_open').addClass('is_close');
+			// 		$container.find('.ig_tilesection_iconarea').hide();
+			// 		$container.find('.ig_tilesection_detailarea DIV').hide();
+			// 		$container.find('.ig_tilesection_detailarea TABLE').hide();
+			// 		storage.set( key, true );
+			// 	}
+			// 	else {
+			// 		$this.addClass('is_open').removeClass('is_close');
+			// 		$container.find('.ig_tilesection_iconarea').show();
+			// 		$container.find('.ig_tilesection_detailarea DIV').show();
+			// 		$container.find('.ig_tilesection_detailarea TABLE').show();
+			// 		storage.remove( key );
+			// 	}
+			// });
+
+			// $this.find('H3').append( $close );
+
+			// if ( close ) {
+			// 	$close.addClass('is_close');
+			// 	$this.find('.ig_tilesection_iconarea').hide();
+			// 	$this.find('.ig_tilesection_detailarea DIV').hide();
+			// 	$this.find('.ig_tilesection_detailarea TABLE').hide();
+			// }
+			// else {
+			// 	$close.addClass('is_open');
+			// }
+	});
+
+	this.trainingPulldown( $innermid );
+	}
+} // Env.chapter >= 11
 
 	$('INPUT:submit').click(function() {
 		var $select = $(this).parent().find('SELECT'),
@@ -15694,7 +15835,98 @@ trainingPulldown: function( $div ) {
 
 	$('.ig_solder_commentarea').text( pool.soldier + ' / ' + pool.capacity );
 
-if( Env.chapter > 8 ) {
+if( Env.chapter < 9 ) {
+	$div.each(function() {
+		var $this = $(this),
+			$table = $this.find('TABLE').eq( 1 ),
+			name = $this.find('H3 B').text().slice(1, -1),
+			data = Soldier.getByName( name ),
+			$tr, $select;
+
+		//各拠点の施設表示
+		$tr = $table.find('TR.noborder');
+		$tr.removeClass('noborder');
+		$tr.find('TH').first().remove();
+		$tr.find('TD').first().remove();
+		$tr.find('TD').attr('colspan', 3);
+
+		//資源不足等で訓練できない場合はプルダウン化処理をしない
+		var $input = $this.find('INPUT[type="text"]');
+		if ( $input.length == 0 ) { return; }
+
+		html = '（分割回数：<select id="create_count_' + data.type + '">' +
+			'<option value="1">1回</option>' +
+			'<option value="2">2回</option>' +
+			'<option value="3">3回</option>' +
+			'<option value="4">4回</option>' +
+			'<option value="5">5回</option>' +
+			'<option value="6">6回</option>' +
+			'<option value="7">7回</option>' +
+			'<option value="8">8回</option>' +
+			'<option value="9">9回</option>' +
+			'<option value="10">10回</option>' +
+		'</select>' +
+		'　<button>複数拠点で訓練する</button>）';
+
+		$tr.find('FORM').append( html );
+		$table
+		.append('<tr><th>拠点</th><th width="70">LV</th>' +
+			'<th width="120"><img alt="訓練する人数" src="' + Env.externalFilePath + '/img/tile/icon_training_num.png"></th>' +
+			'<th width="120"><img alt="訓練にかかる時間" src="' + Env.externalFilePath + '/img/tile/icon_training_time.png"></th>' +
+			'</tr>'
+		)
+		.append('<tbody id="imi_training_' + data.type + '"></tbody>');
+
+		//必要資源取得（金山効果は込）
+		$tr = $table.find('TR').eq( 0 );
+		materials = [
+			$tr.find('.icon_wood').text().match(/(\d+)/)[ 1 ].toInt(),
+			$tr.find('.icon_cotton').text().match(/(\d+)/)[ 1 ].toInt(),
+			$tr.find('.icon_iron').text().match(/(\d+)/)[ 1 ].toInt(),
+			$tr.find('.icon_food').text().match(/(\d+)/)[ 1 ].toInt()
+		];
+
+		var rate = ( market ) ? market.rate : 0,
+			freecapa = pool.capacity - pool.soldier,
+			maxnum = Util.getMaxTraining( resource, materials, 0, freecapa, 0 ),
+			overnum = Util.getMaxTraining( resource, materials, rate, freecapa, maxnum ),
+			val = 0, step = 100, color = '#390', options = [];
+
+		if ( overnum > 10 ) {
+			color = ( maxnum >= 10 ) ? '#390' : '#c30';
+			options.push('<option value="10" style="color: ' + color + '">10</option>');
+		}
+
+		while ( val < overnum ) {
+			val += step;
+			if ( val == maxnum ) { maxnum = Number.MAX_VALUE; }
+			if ( val > maxnum && maxnum != overnum ) {
+				options.push('<option value="' + maxnum + '" style="color: ' + color + '">' + maxnum + '</option>');
+				maxnum = Number.MAX_VALUE;
+			}
+			if ( val > overnum ) { val = overnum; }
+			if ( val >= 1000 ) { step = 500; }
+
+			let result = Util.checkExchange( resource, Util.getConsumption( materials, val ) );
+			if ( result == 0 ) { break; }
+			if ( result == 1 ) { color = '#c30'; }
+
+			options.push('<option value="' + val + '" style="color: ' + color + '">' + val + '</option>');
+		}
+
+		$select = $('<select/>');
+		$select.append( options.join('') );
+		$select.attr({ name: $input.attr('name'), value: unit_value });
+
+		//テキストボックスをプルダウンに置き換え
+		$input.parent().next().remove();
+		$input.replaceWith( $select );
+
+		$select.data({ type: data.type, materials: materials })
+		.change( self.trainingDivide ).trigger('change');
+	});
+}
+else if( Env.chapter < 11 ) {
 	$div.each(function() {
 		var $this = $(this),
 			$tables = $this.find('TABLE').slice( 1 ),
@@ -15793,23 +16025,30 @@ if( Env.chapter > 8 ) {
 	});
 	});
 }
-else {
+else { // 11章
 	$div.each(function() {
 		var $this = $(this),
-			$table = $this.find('TABLE').eq( 1 ),
+			$tables = $this.find('TABLE').slice( 1 ),
 			name = $this.find('H3 B').text().slice(1, -1),
-			data = Soldier.getByName( name ),
-			$tr, $select;
+			data = Soldier.getByName( name );
+
+		$tables.each( function( idx, elm ) {
+			var $tr, $select,
+				tm, dmy, hh, mi, ss;
 
 		//各拠点の施設表示
-		$tr = $table.find('TR.noborder');
+			$tr = $(this).find('TR.noborder');
+			//訓練時間を取得
+			if( $tr.find('TD').first().text() == '' ) { return true; }
+			[ dmy, hh, mi, ss ] = $tr.find('TD').first().text().match(/(\d{2}):(\d{2}):(\d{2})/);
+			tm = hh.toInt() * 3600 + mi.toInt() * 60 + ss.toInt();
 		$tr.removeClass('noborder');
 		$tr.find('TH').first().remove();
 		$tr.find('TD').first().remove();
 		$tr.find('TD').attr('colspan', 3);
 
 		//資源不足等で訓練できない場合はプルダウン化処理をしない
-		var $input = $this.find('INPUT[type="text"]');
+			var $input = $(this).find('INPUT[type="text"]');
 		if ( $input.length == 0 ) { return; }
 
 		html = '（分割回数：<select id="create_count_' + data.type + '">' +
@@ -15826,17 +16065,19 @@ else {
 		'</select>' +
 		'　<button>複数拠点で訓練する</button>）';
 
+			var tab = $(this).parents('[id^=TrainingBlock]').attr('id').match(/\d/)[0];
+
 		$tr.find('FORM').append( html );
-		$table
+			$(this)
 		.append('<tr><th>拠点</th><th width="70">LV</th>' +
 			'<th width="120"><img alt="訓練する人数" src="' + Env.externalFilePath + '/img/tile/icon_training_num.png"></th>' +
 			'<th width="120"><img alt="訓練にかかる時間" src="' + Env.externalFilePath + '/img/tile/icon_training_time.png"></th>' +
 			'</tr>'
 		)
-		.append('<tbody id="imi_training_' + data.type + '"></tbody>');
+			.append('<tbody id="imi_training' + tab + '_' + data.type + '"></tbody>');
 
 		//必要資源取得（金山効果は込）
-		$tr = $table.find('TR').eq( 0 );
+			$tr = $(this).find('TR').eq( 0 );
 		materials = [
 			$tr.find('.icon_wood').text().match(/(\d+)/)[ 1 ].toInt(),
 			$tr.find('.icon_cotton').text().match(/(\d+)/)[ 1 ].toInt(),
@@ -15880,10 +16121,12 @@ else {
 		$input.parent().next().remove();
 		$input.replaceWith( $select );
 
-		$select.data({ type: data.type, materials: materials })
+			$select.data({ type: data.type, materials: materials, idx: tab, tm: tm })
 		.change( self.trainingDivide ).trigger('change');
 	});
+	});
 }
+
 },
 
 //. trainingDivide
