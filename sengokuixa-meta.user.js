@@ -2840,7 +2840,7 @@ var Append = {
 								msg.close();
 								dialog.close();
 								return;
-		}
+							}
 
 							var postData = {
 								sub_id      : '',
@@ -2881,14 +2881,31 @@ var Append = {
 			// ブラックリスト
 			Deck.filter.exceptions = {};
 
-			// 小姓の隠し玉(6702)/小姓の応援(6703)
+			// 小姓の隠し玉(6702)/小姓の応援(6703)(6706)(6707)
+			var pagelist = [];
+
 			Deck.filter.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6702, 'gt'] } );
-			Deck.filter.conditions.push( { condition: ['cardNo', 6703, 'lt'] } );
 			Deck.sort.conditions = [];
+			Deck.filter.conditions.push( { condition: ['cardNo', 6702] } );
 
-			var pagelist = Deck.targetList();
+			pagelist = pagelist.concat( Deck.targetList() );
 
+			Deck.filter.conditions = [];
+			Deck.filter.conditions.push( { condition: ['cardNo', 6703] } );
+
+			pagelist = pagelist.concat( Deck.targetList() );
+
+			Deck.filter.conditions = [];
+			Deck.filter.conditions.push( { condition: ['cardNo', 6706] } );
+
+			pagelist = pagelist.concat( Deck.targetList() );
+
+			Deck.filter.conditions = [];
+			Deck.filter.conditions.push( { condition: ['cardNo', 6707] } );
+
+			pagelist = pagelist.concat( Deck.targetList() );
+
+			// 一般武将
 			Deck.filter.conditions = [];
 			Deck.filter.conditions.push( { condition: ['lv', 19, 'lt' ] } );
 			Deck.filter.conditions.push( { condition: ['cost', 4.5, 'lt' ] } );
@@ -3060,7 +3077,7 @@ var Append = {
 					case 'E'  : 
 					case 'F'  : return 'color: #000'; break;
 					default: return '';
-			}
+				}
 			}
 		});
 	},
@@ -11811,7 +11828,7 @@ skillLevelup: function( card_id, added_cid, material_cid ) {
 //.. skillLevelupSeq  .. スキル連続強化
 skillLevelupSeq: function( card_id, added_cid, material_cid ) {
 	var postData = {
-		ad_id               : 24,
+		// ad_id               : 24,
 		add_flg             : '',
 		base_cid            : card_id.toInt(),
 		btn_change_flg      : '',
@@ -12079,11 +12096,8 @@ analyzeLarge: function( element ) {
 	this.solName = Soldier.getNameByClass( text );
 	this.solType = Soldier.getType( this.solName );
 	//指揮数 commandsol_no_overは大殿の饗宴用
-	this.solNum = param[ fsub ].firstChild.firstChild.nodeValue.toInt();
-	// 11章用...
-	if( !$.isNumeric( this.solNum ) ) {
-		this.solNum = param[ fsub ].firstChild.textContent.toInt();
-	}
+	//  指揮数以下のDOMが変更されたのでtextContentで取得
+	this.solNum = param[ fsub ].firstChild.textContent.toInt();
 	this.maxSolNum = param[ fsub ].childNodes[ 1 ].nodeValue.replace('/', '').toInt();
 	//... 表ここまで
 
@@ -12217,10 +12231,10 @@ analyzeSmall: function( element ) {
 	if ( array != null ) { this.squadId = array[ 1 ]; }
 
 	if( Env.chapter < 11 ) {
-	//battle_gage
-	this.battleGage = $elem.find('.ig_deck_battlepoint2').text().toInt();
-	//gounit
-	this.gounit = $elem.find('#btn_gounit_flg_' + this.cardId ).val();
+		//battle_gage
+		this.battleGage = $elem.find('.ig_deck_battlepoint2').text().toInt();
+		//gounit
+		this.gounit = $elem.find('#btn_gounit_flg_' + this.cardId ).val();
 	}
 	else { // 11章～
 		// 討伐ゲージ
@@ -12536,10 +12550,10 @@ layouterSmall: function( unit ) {
 	}
 	else {
 		if( Env.chapter < 11 ) {
-		//配置ボタンと編成ボタンを入れ替える
-		$a = $div.eq( 2 ).addClass('imc_button_container').find('A');
-		$div.eq( 2 ).empty().append( $a.get().reverse() );
-	}
+			//配置ボタンと編成ボタンを入れ替える
+			$a = $div.eq( 2 ).addClass('imc_button_container').find('A');
+			$div.eq( 2 ).empty().append( $a.get().reverse() );
+		}
 		else { // 11章～
 			//編成ボタン、配置ボタンの順にする、兵数アンカは消す
 			html = '' +
@@ -14487,11 +14501,11 @@ createPulldownMenu: function() {
 		{ title: '【精鋭部隊】', action: '/card/deck.php?select_card_group=6&select_assign_no=4' },
 		{ title: '【兵士退避】', action: function() {
 			var ol = Display.dialog().message('兵士退避中...');
-					Append.gatherSoldierAll( ol )
-					.pipe( ol.close )
-					.done( function() {
-							// 最後は待機兵士一覧を表示
-							location.href = '/facility/unit_list.php';
+			Append.gatherSoldierAll( ol )
+			.pipe( ol.close )
+			.done( function() {
+				// 最後は待機兵士一覧を表示
+				location.href = '/facility/unit_list.php';
 			});
 		} },
 		{ title: '【一括レベルアップ】', action: function() { Append.togetherLevelup(); } },
@@ -19554,7 +19568,7 @@ dialogFavoriteEdit: function() {
 		return false;
 	})
 	.on('click', '.imc_up', function() {
-		console.log('.imc_up click', $(this) );
+		// console.log('.imc_up click', $(this) );
 	})
 	.on('click', '.imc_delete', function() {
 		var $li = $(this).closest('LI'),
@@ -20160,7 +20174,15 @@ autoPager: function() {
 			var page = nextPage,
 				num = $('#deck_file INPUT[name="show_num"]').val();
 
-			return $.post( '/card/deck_card_delete.php', { show_num: num, p: page });
+			if( Env.chapter <= 10 ) {
+				return $.post( '/card/deck_card_delete.php', { show_num: num, p: page });
+			}
+			else {
+				num = $('#deck_file SELECT[name="show_num"]').val();
+				var tmp_num = $('#deck_file INPUT[name="tmp_show_num"]').val();
+
+				return $.post( '/card/deck_card_delete.php', { show_num: num, tmp_show_num: tmp_num, p: page });
+			}
 		},
 		loaded: function( html ) {
 			var $html = $(html),
