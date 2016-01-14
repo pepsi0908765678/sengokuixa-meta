@@ -8,18 +8,26 @@ sengokuixa-meta
 動作確認
 --------
 
-* Firefox38esr + Scriptish0.1.11
+* Firefox 45.0a2 + Greasemonkey 3.6
+* Firefox 38esr + Scriptish0.1.11
 
 インストール
 ------------
 
-* このツールを使用するには[Scriptish](https://addons.mozilla.org/ja/firefox/addon/scriptish/)を事前にインストールしておく必要があります
+* このツールを使用するには[Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)か[Scriptish](https://addons.mozilla.org/ja/firefox/addon/scriptish/)を事前にインストールしておく必要があります
 * 最新版のインストールは[ここ](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta.user.js)をクリック
 * mixiは期と章が取得できないので、[こちら](https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/mixi-support.user.js)も合わせてインストールしてください
  - ログイン後、家紋をクリックすると期と章を尋ねられますので入力すると地図画面での不具合が治ると思います
 
 更新履歴
 --------
+
+### 1.5.1.3
+2016/01/14
+* 動作確認環境を変更
+* 部隊編成画面の解析不具合を修正
+* まとめて隠し玉に小姓の応援(6707)を追加
+ - 今後、応援出すたびに番号増えるんですかね…
 
 ### 1.5.1.2
 2015/11/27
