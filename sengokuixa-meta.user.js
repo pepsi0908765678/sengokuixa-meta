@@ -17916,18 +17916,19 @@ cardOrderSelecter: function() {
 
 	//デッキ画面では両方マッチしてしまうためlastを使用
 	$('.center_posi, #selectarea').last().append( $span );
-	$('#deck_file, #ig_deck_cardlistmenu2, .center_posi').last().append( $div );
+	$('#deck_file, #ig_deck_cardlistmenu2, .center_posi, #selectarea').last().append( $div );
 
-	$span.toggle(
-		function() {
+	$(document)
+	.on( 'click', '#imi_order_open', function() {
+		if( $('#imi_cardorder_list:hidden').length ) {
 			$('#imi_cardorder_list').trigger('update').show();
 			$(this).removeClass('imc_is_close').addClass('imc_is_open');
-		},
-		function() {
+		}
+		else {
 			$('#imi_cardorder_list').hide();
 			$(this).removeClass('imc_is_open').addClass('imc_is_close');
 		}
-	);
+	});
 
 	$('#selectarea, #deck_file').on('change', 'SELECT', function() {
 		//ソート項目が重複したとき、後ろの項目を「未設定」にする
@@ -19868,6 +19869,20 @@ style: '' +
 'INPUT { ime-mode: disabled; }' +
 '.tradecmd { position:relative; top:320px; left: 6px; width:212px; }' +
 '.price { float:right; height:18px; margin:2px; text-align:right; width: 72px;}' +
+
+/* ソート条件選択用 */
+'#imi_order_open { color: #fff; padding: 3px 2px 2px 3px; border: solid 1px #666; border-radius: 3px; cursor: pointer; }' +
+'#imi_order_open:hover { background-color: #09f; border-color: #069; }' +
+'#imi_order_open.imc_is_open:after { content: "▲" }' +
+'#imi_order_open.imc_is_close:after { content: "▼" }' +
+'#imi_cardorder_list { color: #000; position: relative; clear: both; left: 10px; padding: 10px; width: 694px; min-height: 35px; background-color: #F3F2DE; border-radius: 0px 0px 5px 5px; box-shadow: 5px 5px 5px rgba(0,0,0,0.8); z-index: 10; }' +
+'#imi_cardorder_list LI { padding: 3px 5px; border-bottom: solid 1px #cc9; font-size: 12px; letter-spacing: 2px; }' +
+'#imi_cardorder_list INPUT { width: 400px; }' +
+'#imi_cardorder_list .imc_order_title { display: inline-block; margin-bottom: -2px; padding-top: 1px; width: 498px; text-align: left; cursor: default; white-space: nowrap; overflow: hidden; }' +
+'#imi_cardorder_list .imc_command { display: inline-block; width: 186px; text-align: right; }' +
+'#imi_cardorder_list .imc_command SPAN { margin: 0px 2px; padding: 2px 4px; border-radius: 5px; cursor: pointer; }' +
+'#imi_cardorder_list .imc_command SPAN:hover { color: #fff; background-color: #09f; }' +
+
 '',
 
 //.. main
@@ -19876,6 +19891,11 @@ main: function() {
 
 	this.autoPager();
 	this.layouter( $cards );
+
+	// 出品画面のソートは11章から
+	if( Env.chapter > 10 ) {
+		this.cardOrderSelecter();
+	}
 },
 
 //.. autoPager
@@ -19983,6 +20003,9 @@ exhibit: function( cid, price ) {
 
 	return d.promise();
 },
+
+//. cardOrderSelecter
+cardOrderSelecter: Page.getAction( 'facility', 'set_unit_list', 'cardOrderSelecter' ),
 
 });
 
