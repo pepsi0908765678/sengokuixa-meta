@@ -6894,12 +6894,6 @@ var Map = {
 			  { actClass: 'ime_createUnitNearby', caption: '【第四組】', num: 4 },
 			  { actClass: 'ime_createUnitNearby', caption: '【未設定】', num: 5 },
 			  { actClass: 'ime_createUnitNearby', wrapClass: ' imc_separater', caption: '【全部隊】', num: 0 }],
-			elite_n = elites.map( function( currentValue, idx ) {
-				return { actClass: 'ime_assignEliteNearby', caption: `【${currentValue}】部隊`, num: idx + 1 };
-			}),
-			favrt_n = favorite.map( function( currentValue, idx ) {
-				return { actClass: 'ime_assignFavoriteNearby', caption: `《${currentValue.tag}》${currentValue.name}`, num: idx };
-			}),
 			group_b =
 			[ { actClass: 'ime_createUnit', caption: '【第一組】', num: 1 },
 			  { actClass: 'ime_createUnit', caption: '【第二組】', num: 2 },
@@ -6907,12 +6901,25 @@ var Map = {
 			  { actClass: 'ime_createUnit', caption: '【第四組】', num: 4 },
 			  { actClass: 'ime_createUnit', caption: '【未設定】', num: 5 },
 			  { actClass: 'ime_createUnit', wrapClass: ' imc_separater', caption: '【全部隊】', num: 0 }],
+			elite_n = [], elite_b = [],
+			favrt_n = [], favrt_b = [];
+		
+		if( elites.length > 0 ) {
+			elite_n = elites.map( function( currentValue, idx ) {
+				return { actClass: 'ime_assignEliteNearby', caption: `【${currentValue}】部隊`, num: idx + 1 };
+			});
 			elite_b = elites.map( function( currentValue, idx ) {
 				return { actClass: 'ime_assignElite', caption: `【${currentValue}】部隊`, num: idx + 1 };
-			}),
+			});
+		}
+		if( favorite.length > 0 ) {
+			favrt_n = favorite.map( function( currentValue, idx ) {
+				return { actClass: 'ime_assignFavoriteNearby', caption: `《${currentValue.tag}》${currentValue.name}`, num: idx };
+			});
 			favrt_b = favorite.map( function( currentValue, idx ) {
 				return { actClass: 'ime_assignFavorite', caption: `《${currentValue.tag}》${currentValue.name}`, num: idx };
 			});
+		}
 
 		function tag_unit( str, ...vals ) {
 			var wclass  = vals[0].hasOwnProperty('wrapClass') ? vals[0].wrapClass: '',
