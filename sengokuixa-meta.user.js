@@ -20483,9 +20483,10 @@ style: '' +
 '#war_rank_title { width: 50px; }' +
 '#war_rank { font-size: 12px; }' +
 
-// 同盟名
+// 同盟名 / 地形効果
 '.ig_map_grouptitle { width: 40px; }' +
 '#alliance_name { font-size: 12px; width: 155px; }' +
+'.mapEftW { font-size: 12px; }' +
 // 人口
 '.ig_map_populationtitle { width: 55px; }' +
 '#population { font-size: 12px; width: 135px; }' +
@@ -20587,6 +20588,7 @@ layouterNew: function() {
 	$('#act_battle_data, #map_statusbox, #map_textarea').remove();
 
 	// 情報表示エリアの調整
+	if( Map.info.country != 20 && Map.info.country != 21 ) {
 	html = '<tbody>' +
 	'<tr>' +
 	// 城主名
@@ -20602,7 +20604,6 @@ layouterNew: function() {
 	$('#war_rank_title').get(0).outerHTML +
 	$('#war_rank').get(0).outerHTML +
 	'</tr>' +
-
 	'<tr>' +
 	// 同盟名
 	$('.ig_map_grouptitle').get(0).outerHTML +
@@ -20610,9 +20611,6 @@ layouterNew: function() {
 	// 人口
 	$('.ig_map_populationtitle').get(0).outerHTML +
 	$('#population').get(0).outerHTML +
-	// // 資源
-	// $('#material_title').get(0).outerHTML +
-	// $('#material').get(0).outerHTML +
 	// 国別格付
 	$('#increase_rank_title').get(0).outerHTML +
 	$('#increase_rank').get(0).outerHTML +
@@ -20626,7 +20624,51 @@ layouterNew: function() {
 		'<td colspan="3"><span id="imi_npc_attack"/></td>' +
 	'</tr>' +
 	'</tbody>';
+	}
+	// 東西戦は人口がない代わりに地形効果
+	else {
+		html = '<tbody>' +
+		'<tr>' +
+		// 城主名
+		$('.ig_map_ownertitle').get(0).outerHTML +
+		$('#user_name').get(0).outerHTML +
+		// 座標/距離
+		$('.ig_map_placetitle').get(0).outerHTML +
+		$('#x_y').get(0).outerHTML +
+		// 価値
+		$('#power_title').get(0).outerHTML +
+		$('#power').get(0).outerHTML +
+		// 合戦格付
+		$('#war_rank_title').get(0).outerHTML +
+		$('#war_rank').get(0).outerHTML +
+		'</tr>' +
 
+		'<tr>' +
+		// 同盟名
+		$('.ig_map_grouptitle').get(0).outerHTML +
+		$('#alliance_name').get(0).outerHTML +
+		// 地形効果
+		'<th class="ig_map_grouptitle">' +
+		$('.ig_map_grouptitle').get(1).innerHTML +
+		'</th>' +
+		'<td>' +
+		$('#map_effect_atc').get(0).outerHTML +
+		$('#map_effect_def').get(0).outerHTML +
+		'</td>' +
+		// 国別格付
+		$('#increase_rank_title').get(0).outerHTML +
+		$('#increase_rank').get(0).outerHTML +
+		'</tr>' +
+		'<tr>' +
+		// 資源
+		$('#material_title').get(0).outerHTML +
+		$('#material').get(0).outerHTML +
+		// NPC空き地必要攻撃力表示エリア
+			'<th class="imc_map_npcattack">攻撃力</th>' +
+			'<td colspan="3"><span id="imi_npc_attack"/></td>' +
+		'</tr>' +
+		'</tbody>';
+	}
 	$(html).replaceAll( '.new_worldmap_mapdata_s11 TBODY' );
 
 
