@@ -1670,8 +1670,8 @@ else {
 getMaxTraining: function( resource, requirements, rate, max, min ) {
 	var c, materials, check, result = min;
 
-	while ( min <= max ) {
-		c = Math.floor( ( max + min ) / 2 );
+	while ( min.toInt() <= max.toInt() ) {
+		c = Math.floor( ( max.toInt() + min.toInt() ) / 2 );
 		materials = Util.getConsumption( requirements, c );
 		check = Util.checkExchange( resource, materials, rate );
 
@@ -1770,6 +1770,58 @@ divide2: function( list, soldata, time ) {
 	}
 
 	facilities.totalnum = total;
+
+	return facilities;
+},
+
+//. divide3 / 上位訓練用
+divide3: function( list, soldata_b, soldata_a, solnum ) {
+	var uranai = Util.getUranai(),
+	 	facilities = [], maxidx = 0, total = 0, soltotal = 0;
+
+	// 上位訓練の訓練時間がわからぬ...
+	//  差分*占い(切り捨て)+3秒?
+	for ( var i = 0, len = list.length; i < len; i++ ) {
+		let facility = $.extend( { type_b: soldata_b.type, type_a: soldata_a.type }, list[ i ] );
+		let base = soldata_a.training[ 0 ] - soldata_b.training[ 0 ],
+			diff = soldata_a.training[ facility.lv - 1 ] - soldata_b.training[ facility.lv - 1 ];
+
+		facility.diff = Math.floor( diff * uranai[1] );
+		facility.rate = base / (15 - facility.lv + diff);
+		total += facility.rate;
+
+		facilities.push( facility );
+	}
+
+	if ( facilities.length == 1 ) {
+		//施設が１つの場合、分配しない
+		facilities[ 0 ].solnum = solnum;
+	}
+	else {
+		for ( var i = 0, len = facilities.length; i < len; i++ ) {
+			let facility = facilities[ i ];
+
+			facility.rate = facility.rate / total;
+			facility.solnum = Math.floor( solnum * facility.rate );
+
+			soltotal += facility.solnum;
+
+			if ( facility.lv > facilities[ maxidx ].lv ) { maxidx = i; }
+		}
+
+		if ( soltotal != solnum ) {
+			//小数点以下を切り捨てているので、不足分はLVが一番高い施設で調整
+			facilities[ maxidx ].solnum += ( solnum - soltotal );
+		}
+	}
+
+	for ( var i = 0, len = facilities.length; i < len; i++ ) {
+		let facility = facilities[ i ];
+
+		facility.materials = Util.getConsumption( soldata_a.materials, facility.solnum );
+
+		facility.trainingtime = Math.floor( facility.diff * uranai[ 1 ] + 3.0 ) * facility.solnum;
+	}
 
 	return facilities;
 },
@@ -4719,9 +4771,9 @@ else {
 	// 11章以降
 	data = {
 		//槍
-		'足軽':     { type: 321, class: 'yari1', attack: 11, defend: 12, speed: 15, destroy:  2, command: '槍', skillType: '槍', training: [  90, 73, 59, 48, 39, 32, 26, 22, 18, 15, 13, 11,  9,  8, 7 ], dou:   0, require: ['槍', '槍'], order: 1 },
-		'長槍足軽': { type: 322, class: 'yari2', attack: 17, defend: 18, speed: 16, destroy:  2, command: '槍', skillType: '槍', training: [ 105, 85, 69, 56, 45, 37, 30, 25, 21, 17, 14, 12, 11,  9, 8 ], dou:  10, require: ['槍', '槍'], order: 2 },
-		'武士':     { type: 323, class: 'yari3', attack: 21, defend: 22, speed: 18, destroy:  3, command: '槍', skillType: '槍', training: [ 120, 97, 78, 63, 51, 42, 34, 28, 23, 19, 16, 14, 12, 10, 9 ], dou: 200, require: ['槍', '弓'], order: 3 },
+		'足軽':     { type: 321, class: 'yari1', attack: 11, defend: 12, speed: 15, destroy:  2, command: '槍', skillType: '槍', training: [  85, 69, 56, 45, 37, 30, 25, 21, 17, 15, 12, 11,  9,  8, 7 ], dou:   0, require: ['槍', '槍'], order: 1 },
+		'長槍足軽': { type: 322, class: 'yari2', attack: 17, defend: 18, speed: 16, destroy:  2, command: '槍', skillType: '槍', training: [ 100, 81, 66, 53, 43, 35, 29, 24, 20, 17, 14, 12, 10,  9, 8 ], dou:  10, require: ['槍', '槍'], order: 2 },
+		'武士':     { type: 323, class: 'yari3', attack: 21, defend: 22, speed: 18, destroy:  3, command: '槍', skillType: '槍', training: [ 115, 93, 75, 61, 49, 40, 33, 27, 22, 19, 16, 13, 11, 10, 8 ], dou: 200, require: ['槍', '弓'], order: 3 },
 		'国人衆':   { type: 324, class: 'yari4', attack: 19, defend: 18, speed: 19, destroy:  4, command: '槍', skillType: '槍', training: [], dou:   0, require: ['槍', '槍'], order: 0 },
 		//弓
 		'弓足軽':   { type: 325, class: 'yumi1', attack: 10, defend: 13, speed: 16, destroy:  1, command: '弓', skillType: '弓', training: [  95,  77, 62, 51, 41, 34, 28, 23, 19, 16, 13, 11, 10,  9, 8 ], dou:   0, require: ['弓', '弓'], order: 1 },
@@ -5998,7 +6050,9 @@ var Map = {
 				data.distance   = a.distance;
 				data.npc        = '';
 
-				data.country = a.country_id.toInt();
+				if( Map.info.country != 20 && Map.info.country != 21 ) {
+					data.country = a.country_id.toInt();
+				}
 				data.scale = a.size.toUpperCase();
 
 				// タイプと彼我
@@ -15478,7 +15532,9 @@ style: '' +
 :
 // 11章からは通常、高速、上位とタブに分かれた
 'DIV.ig_tilesection_training_info { border-top: 0 none #000; }' +
-'.paneltable, .paneltableInside, .paneltable_blue, .paneltable_red { border-collapse: separate; }'
+'.paneltable, .paneltableInside, .paneltable_blue, .paneltable_red { border-collapse: separate; }' +
+'.gradeup_before { height: auto; }' +
+'.gradeup_after { min-height: auto; padding-top: 12px; }'
 ) +
 /* 市用 */
 '.table_tile_market TD IMG { border: solid 2px black; border-radius: 2px; padding: 2px; margin-right: 5px; cursor: pointer; }' +
@@ -15524,6 +15580,7 @@ training: function( name ) {
 
 	//訓練中の兵士情報取得
 	var list = {};
+if( Env.chapter < 11 ) {
 	$('TABLE.paneltable_red').each(function() {
 		var $this = $(this),
 			key = $this.find('TR:eq(0) TD').text(),
@@ -15538,6 +15595,23 @@ training: function( name ) {
 
 		list[ key ].append( $tr );
 	});
+}
+else {
+	$('TABLE.paneltable:has(:contains("訓練中の兵士"))').each(function() {
+		var $this = $(this),
+			key = $this.find('TR:eq(0) TD').text(),
+			$tr;
+
+		if ( !list[ key ] ) {
+			list[ key ] = $(`<table class="${$(this).attr('class')} imc_training" />`);
+		}
+
+		$tr = $('<tr/>'),
+		$tr.append( $this.find('TR').slice( 1, 4 ).children().removeAttr('width') );
+
+		list[ key ].append( $tr );
+	});
+}
 
 	//残った訓練中の兵士情報表示欄を削除
 	$('P:contains("現在、訓練中の兵士です。")').prev().nextUntil('.ig_paneloutbtn').remove();
@@ -15619,7 +15693,7 @@ else if( Env.chapter < 11 ) {
 		$this.find('.create_unit_type_title').remove();
 
 		//現在の兵士数表示位置変更
-		text = $this.find('DIV.ig_tilesection_iconarea > P').remove().text() || '';
+			text = $this.find('.unit_info_now_unit_count').remove().text() || '';
 		text = ( text.match(/(\d+)/) || [,0] )[1];
 		$this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
 
@@ -15662,83 +15736,6 @@ else if( Env.chapter < 11 ) {
 	});
 
 	this.trainingPulldown( $innermid );
-} // Env.chapter < 11
-else {
-	var blockid; // 1:通常 2:高速 3:上位
-	for( var i = 1; i < 3; i++ ) {
-		var $block = $('#TrainingBlock'+i);
-
-		//兵種表示を逆に
-		var $div = $block.children('.ig_tilesection_mid'),
-			$innertop = $div.children('DIV:nth-child(3n+1)'),
-			$innermid = $div.children('DIV:nth-child(3n+2)'),
-			$innerbottom = $div.children('DIV:nth-child(3n)');
-
-		$innertop.each(function( idx ) {
-			$div.prepend( $innerbottom.eq( idx ) );
-			$div.prepend( $innermid.eq( idx ) );
-			$div.prepend( $innertop.eq( idx ) );
-		});
-
-		// 作成可能兵士数
-		$div.prepend('<div class="ig_solder_commentarea" />');
-
-		//訓練数の表示、表示幅微調整
-		$innermid.each(function() {
-			var $this = $(this),
-				name  = $this.find('H3 B').text().slice(1, -1),
-				key   = '訓練_' + name,
-				close = storage.get( key ),
-				$close, html, text;
-
-			//兵種の説明
-			$this.find('.ig_tile_explain').hide();
-
-			// //現在の兵士数表示位置変更
-			// text = $this.find('DIV.ig_tilesection_iconarea > P').remove().text() || '';
-			// text = ( text.match(/(\d+)/) || [,0] )[1];
-			// $this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
-
-			// //訓練中の兵士表示
-			// if ( list[ name ] ) { $this.append( list[ name ] ); }
-
-			// $close = $('<span class="imc_training_button"></span>');
-			// $close.click(function() {
-			// 	var $this = $(this),
-			// 		$container = $this.closest('.ig_tilesection_innerborder_high_speed,.ig_tilesection_innerborder');
-
-			// 	if ( $this.hasClass('is_open') ) {
-			// 		$this.removeClass('is_open').addClass('is_close');
-			// 		$container.find('.ig_tilesection_iconarea').hide();
-			// 		$container.find('.ig_tilesection_detailarea DIV').hide();
-			// 		$container.find('.ig_tilesection_detailarea TABLE').hide();
-			// 		storage.set( key, true );
-			// 	}
-			// 	else {
-			// 		$this.addClass('is_open').removeClass('is_close');
-			// 		$container.find('.ig_tilesection_iconarea').show();
-			// 		$container.find('.ig_tilesection_detailarea DIV').show();
-			// 		$container.find('.ig_tilesection_detailarea TABLE').show();
-			// 		storage.remove( key );
-			// 	}
-			// });
-
-			// $this.find('H3').append( $close );
-
-			// if ( close ) {
-			// 	$close.addClass('is_close');
-			// 	$this.find('.ig_tilesection_iconarea').hide();
-			// 	$this.find('.ig_tilesection_detailarea DIV').hide();
-			// 	$this.find('.ig_tilesection_detailarea TABLE').hide();
-			// }
-			// else {
-			// 	$close.addClass('is_open');
-			// }
-		});
-
-		this.trainingPulldown( $innermid );
-	}
-} // Env.chapter >= 11
 
 	$('INPUT:submit').click(function() {
 		var $select = $(this).parent().find('SELECT'),
@@ -15783,6 +15780,186 @@ else {
 
 		return false;
 	});
+} // Env.chapter < 11
+else {
+	// #TrainingBlock 1:通常 2:高速 3:上位
+	for( var i = 1; i <= 2; i++ ) {
+		var $block = $('#TrainingBlock'+i);
+
+		//兵種表示を逆に
+		var $div = $block.children('.ig_tilesection_mid'),
+			$innertop = $div.children('DIV:nth-child(3n+1)'),
+			$innermid = $div.children('DIV:nth-child(3n+2)'),
+			$innerbottom = $div.children('DIV:nth-child(3n)');
+
+		$innertop.each(function( idx ) {
+			$div.prepend( $innerbottom.eq( idx ) );
+			$div.prepend( $innermid.eq( idx ) );
+			$div.prepend( $innertop.eq( idx ) );
+		});
+
+		// 作成可能兵士数
+		$div.prepend('<div class="ig_solder_commentarea" />');
+
+		//訓練数の表示、表示幅微調整
+		$innermid.each(function() {
+			var $this = $(this),
+				name  = $this.find('H3 B').text().slice(1, -1),
+				key   = '訓練_' + name,
+				close = storage.get( key ),
+				$close, html, text;
+
+			//兵種の説明
+			$this.find('.ig_tile_explain').hide();
+
+			//現在の兵士数表示位置変更
+			text = $this.find('.unit_info_now_unit_count').remove().text() || '';
+			text = ( text.match(/(\d+)/) || [,0] )[1];
+			$this.find('H3').append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
+
+			//訓練中の兵士表示
+			if ( list[ name ] ) { $this.append( list[ name ].clone() ); }
+
+			$close = $('<span class="imc_training_button"></span>');
+			$close.click(function() {
+				var $this = $(this),
+					$container = $this.closest('.ig_tilesection_innerborder_high_speed,.ig_tilesection_innerborder');
+
+				if ( $this.hasClass('is_open') ) {
+					$this.removeClass('is_open').addClass('is_close');
+					$container.find('.ig_tilesection_iconarea').hide();
+					$container.find('.ig_tilesection_detailarea DIV').hide();
+					$container.find('.ig_tilesection_detailarea TABLE').hide();
+					storage.set( key, true );
+				}
+				else {
+					$this.addClass('is_open').removeClass('is_close');
+					$container.find('.ig_tilesection_iconarea').show();
+					$container.find('.ig_tilesection_detailarea DIV').show();
+					$container.find('.ig_tilesection_detailarea TABLE').show();
+					storage.remove( key );
+				}
+			});
+
+			$this.find('H3').append( $close );
+
+			if ( close ) {
+				$close.addClass('is_close');
+				$this.find('.ig_tilesection_iconarea').hide();
+				$this.find('.ig_tilesection_detailarea DIV').hide();
+				$this.find('.ig_tilesection_detailarea TABLE').hide();
+			}
+			else {
+				$close.addClass('is_open');
+			}
+		});
+
+		this.trainingPulldown( $innermid );
+	}
+
+	// 上位訓練
+	$('#TrainingBlock3 .ig_tilesection_innermid').each( function() {
+		var $this = $(this);
+
+		// 兵種の説明
+		$this.find('.ig_tile_explain').hide();
+
+		//現在の兵士数表示位置変更
+		text = $this.find('.gradeup_before .unit_info_now_unit_count').remove().text() || '';
+		text = ( text.match(/(\d+)/) || [,0] )[1];
+		$this.find('.gradeup_before H3').data('count', text).append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
+
+		text = $this.find('.gradeup_after .unit_info_now_unit_count').remove().text() || '';
+		text = ( text.match(/(\d+)/) || [,0] )[1];
+		$this.find('.gradeup_after H3').data('count', text).append('<span style="margin: 0px 15px;">待機数 ： ' + text + '</span>');
+	});
+
+	this.gradeupPulldown( $('#TrainingBlock3 .ig_tilesection_innermid') );
+
+	$('INPUT:submit').click(function() {
+		var $select = $(this).parent().find('SELECT'),
+			unit_value = $select.val();
+
+		storage.set('unit_value', unit_value);
+	});
+
+	// 通常訓練、高速訓練
+	$('#TrainingBlock1,#TrainingBlock2')
+	.on( 'click', 'BUTTON', function() {
+		var $select = $(this).parent().find('SELECT'),
+			unit_value = $select.first().val(),
+			create_count = $select.last().val(),
+			facilities = $select.data('facilities'),
+			current = Util.getVillageCurrent(),
+			total = $select.data('total'),
+			ol;
+
+		$.Deferred().resolve()
+		.then(function() {
+			var resource = Util.getResource(),
+				result = Util.checkExchange( resource, total );
+
+			if ( result == 0 ) {
+				return $.Deferred().reject();
+			}
+			else if ( result == 1 ) {
+				return Display.dialogExchange( resource, total );
+			}
+			else {
+				if ( !window.confirm('訓練を開始してよろしいですか？') ) {
+					return $.Deferred().reject();
+				}
+			}
+		})
+		.then(function() {
+			ol = Display.dialog();
+			ol.message('訓練登録処理開始...');
+
+			storage.set('unit_value', unit_value);
+			self.trainingExecute( facilities, create_count, current, ol );
+		});
+
+		return false;
+	});
+	// 上位訓練
+	$('#TrainingBlock3')
+	.on( 'click', 'BUTTON', function() {
+		var $select = $(this).parent().find('SELECT'),
+			unit_value = $select.first().val(),
+			create_count = $select.last().val(),
+			facilities = $select.data('facilities'),
+			current = Util.getVillageCurrent(),
+			total = $select.data('total'),
+			ol;
+
+		$.Deferred().resolve()
+		.then(function() {
+			var resource = Util.getResource(),
+				result = Util.checkExchange( resource, total );
+
+			if ( result == 0 ) {
+				return $.Deferred().reject();
+			}
+			else if ( result == 1 ) {
+				return Display.dialogExchange( resource, total );
+			}
+			else {
+				if ( !window.confirm('訓練を開始してよろしいですか？') ) {
+					return $.Deferred().reject();
+				}
+			}
+		})
+		.then(function() {
+			ol = Display.dialog();
+			ol.message('訓練登録処理開始...');
+
+			storage.set('unit_value', unit_value);
+			self.gradeupExecute( facilities, create_count, current, ol );
+		});
+
+		return false;
+	});
+} // Env.chapter >= 11
 },
 
 //. trainingPulldown
@@ -16089,6 +16266,124 @@ else { // 11章
 
 },
 
+//. gradeupPulldown
+gradeupPulldown: function( $div ) {
+	var self = this,
+		unit_value = MetaStorage('SETTINGS').get('unit_value') || 100,
+		resource = Util.getResource(),
+		pool = Util.getPoolSoldiers(),
+		market = Util.getMarket();
+
+	// $('.ig_solder_commentarea').text( pool.soldier + ' / ' + pool.capacity );
+
+	$div.each(function() {
+		var $this = $(this),
+			$tables = $this.find('TABLE').slice( 2 ),
+			// name = $this.find('H3 B').text().slice(1, -1);
+			name_b = $this.find('.gradeup_before H3 B').text().slice(1, -1),
+			name_a = $this.find('.gradeup_after H3 B').text().slice(1, -1);
+
+		// 	data = Soldier.getByName( name );
+		var data_b = Soldier.getByName( name_b ), count_b = $this.find('.gradeup_before H3').data('count'),
+			data_a = Soldier.getByName( name_a );
+
+		$tables.each( function( idx, elm ) {
+			var $tr, $select,
+				tm, dmy, hh, mi, ss;
+
+			//各拠点の施設表示
+			$tr = $(this).find('TR.noborder');
+			//訓練時間を取得
+			if( $tr.find('TD').first().text() == '' ) { return true; }
+			[ dmy, hh, mi, ss ] = $tr.find('TD').first().text().match(/(\d{2}):(\d{2}):(\d{2})/);
+			tm = hh.toInt() * 3600 + mi.toInt() * 60 + ss.toInt();
+			$tr.removeClass('noborder');
+			$tr.find('TH').first().remove();
+			$tr.find('TD').first().remove();
+			$tr.find('TD').attr('colspan', 3);
+
+			//資源不足等で訓練できない場合はプルダウン化処理をしない
+			var $input = $(this).find('INPUT[type="text"]');
+			if ( $input.length == 0 ) { return; }
+
+			html =
+			'（分割回数：<select id="create_count_' + data_b.type + '">' +
+				'<option value="1">1回</option>' +
+				'<option value="2">2回</option>' +
+				'<option value="3">3回</option>' +
+				'<option value="4">4回</option>' +
+				'<option value="5">5回</option>' +
+				'<option value="6">6回</option>' +
+				'<option value="7">7回</option>' +
+				'<option value="8">8回</option>' +
+				'<option value="9">9回</option>' +
+				'<option value="10">10回</option>' +
+			'</select>' +
+			'　<button>複数拠点で訓練する</button>）';
+
+			var tab = $(this).parents('[id^=TrainingBlock]').attr('id').match(/\d/)[0];
+
+			$tr.find('FORM').append( html );
+			$(this)
+			.append('<tr><th>拠点</th><th width="70">LV</th>' +
+				'<th width="120"><img alt="訓練する人数" src="' + Env.externalFilePath + '/img/tile/icon_training_num.png"></th>' +
+				'<th width="120"><img alt="訓練にかかる時間" src="' + Env.externalFilePath + '/img/tile/icon_training_time.png"></th>' +
+				'</tr>'
+			)
+			.append(`<tbody id="imi_training${tab}_${data_b.type}_${data_a.type}"></tbody>`);
+
+			//必要資源取得（金山効果は込）
+			$tr = $(this).find('TR').eq( 0 );
+			materials = [
+				$tr.find('.icon_wood').text().match(/(\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_cotton').text().match(/(\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_iron').text().match(/(\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_food').text().match(/(\d+)/)[ 1 ].toInt()
+			];
+
+			var rate = ( market ) ? market.rate : 0,
+				freecapa = count_b,
+				maxnum = Util.getMaxTraining( resource, materials, 0, freecapa, 0 ),
+				overnum = Util.getMaxTraining( resource, materials, rate, freecapa, maxnum ),
+				val = 0, step = 100, color = '#390', options = [];
+
+			if ( overnum > 10 ) {
+				color = ( maxnum >= 10 ) ? '#390' : '#c30';
+				options.push('<option value="10" style="color: ' + color + '">10</option>');
+			}
+
+			while ( val < overnum ) {
+				val += step;
+				if ( val == maxnum ) { maxnum = Number.MAX_VALUE; }
+				if ( val > maxnum && maxnum != overnum ) {
+					options.push('<option value="' + maxnum + '" style="color: ' + color + '">' + maxnum + '</option>');
+					maxnum = Number.MAX_VALUE;
+				}
+				if ( val > overnum ) { val = overnum; }
+				if ( val >= 1000 ) { step = 500; }
+
+				let result = Util.checkExchange( resource, Util.getConsumption( materials, val ) );
+				if ( result == 0 ) { break; }
+				if ( result == 1 ) { color = '#c30'; }
+
+				options.push('<option value="' + val + '" style="color: ' + color + '">' + val + '</option>');
+			}
+
+			$select = $('<select/>');
+			$select.append( options.join('') );
+			$select.attr({ name: $input.attr('name') });
+			// $select.val( unit_value );
+
+			//テキストボックスをプルダウンに置き換え
+			$input.parent().next().remove();
+			$input.replaceWith( $select );
+
+			$select.data({ type_b: data_b.type, type_a: data_a.type, materials: materials, idx: tab, tm: tm })
+			.change( self.gradeupDivide ).trigger('change');
+		});
+	});
+},
+
 //. trainingDivide
 trainingDivide: function( e ) {
 if( Env.chapter > 8 ) {
@@ -16199,6 +16494,64 @@ else {
 }
 },
 
+//. gradeupDivide
+gradeupDivide: function( e ) {
+	var $this = $(this),
+		solnum = $this.val().toInt(),
+		{ type_b, type_a, materials, idx, tm } = $this.data(),
+		list = $(document).data('facilitylist'),
+		// soldata = Soldier.getByType( type ),
+		soldata_b =  Soldier.getByType( type_b ),
+		soldata_a =  Soldier.getByType( type_a ),
+		html = '', total_wood = total_stone = total_iron = total_rice = 0,
+		facilities;
+
+	soldata_b.materials =  materials;
+	soldata_a.materials =  materials;
+	facilities = Util.divide3( list, soldata_b, soldata_a, solnum );
+
+	$.each( facilities, function() {
+		var [ wood, stone, iron, rice ] = this.materials;
+
+		total_wood  += wood;
+		total_stone += stone;
+		total_iron  += iron;
+		total_rice  += rice;
+
+		html += '<tr class="imc_facility">' +
+			'<th>' + this.name + '</th>' +
+			'<td>' + this.lv + '</td>' +
+			'<td>' + this.solnum + '</td>' +
+			'<td>' + ( tm * this.solnum ).toFormatTime() + '</td>' +
+		'</tr>';
+	});
+
+	//消費資源表示
+	var resource = Util.getResource(),
+		$tr = $this.closest('TBODY').find('TR').eq( 0 ).clone(),
+		surplus;
+
+	surplus = ( total_wood <= resource[ 0 ] );
+	$tr.find('.icon_wood').text( '木 ' + total_wood.toFormatNumber() )
+		.toggleClass('imc_surplus', surplus ).toggleClass('imc_shortage', !surplus );
+
+	surplus = ( total_stone <= resource[ 1 ] );
+	$tr.find('.icon_cotton').text( '綿 ' + total_stone.toFormatNumber() )
+		.toggleClass('imc_surplus', surplus ).toggleClass('imc_shortage', !surplus );
+
+	surplus = ( total_iron <= resource[ 2 ] );
+	$tr.find('.icon_iron').text( '鉄 ' + total_iron.toFormatNumber() )
+		.toggleClass('imc_surplus', surplus ).toggleClass('imc_shortage', !surplus );
+
+	surplus = ( total_rice <= resource[ 3 ] );
+	$tr.find('.icon_food').text( '糧 ' + total_rice.toFormatNumber() )
+		.toggleClass('imc_surplus', surplus ).toggleClass('imc_shortage', !surplus );
+
+	$(`#imi_training${idx}_${type_b}_${type_a}`).html( html ).append( $tr );
+
+	$this.data({ facilities: facilities, total: [ total_wood, total_stone, total_iron, total_rice ] });
+},
+
 //. trainingExecute
 trainingExecute: function( facilities, create_count, current, ol ) {
 	var data = facilities.shift(),
@@ -16218,6 +16571,52 @@ trainingExecute: function( facilities, create_count, current, ol ) {
 		var href = '/facility/facility.php?x=' + data.x + '&y=' + data.y;
 
 		return $.post( href, { unit_id: data.type, x: data.x, y: data.y, count: data.solnum, create_count: create_count, btnSend: true } );
+	})
+	.then(function() {
+		if ( facilities.length == 0 ) {
+			ol.message('訓練登録処理完了').message('ページを更新します...');
+
+			var href = Util.getVillageChangeUrl( current.id, '/facility/unit_list.php' );
+
+			Page.move( href );
+		}
+		else {
+			self.call( self, facilities, create_count, current, ol );
+		}
+	});
+},
+
+//. gradeupExecute
+gradeupExecute: function( facilities, create_count, current, ol ) {
+	var data = facilities.shift(),
+		self = arguments.callee;
+
+	if ( !data ) { return; }
+
+	$.Deferred().resolve()
+	.then(function() {
+		var href = Util.getVillageChangeUrl( data.id, '/user/' );
+
+		return $.get( href );
+	})
+	.then(function() {
+		ol.message('「' + data.name + '」にて登録中...');
+
+		var href = '/facility/facility.php?x=' + data.x + '&y=' + data.y;
+		var params = {
+			x: data.x,
+			y: data.y,
+			unit_id: data.type_a,
+			count: data.solnum,
+			upgrade: 1,
+			from: data.type_b,
+			to: data.type_a,
+			create_count: create_count,
+			btnSend: true,
+		};
+		params[`unit_value_upgrade[${data.type_b}_${data.type_a}]`] = data.solnum;
+
+		return $.post( href, params );
 	})
 	.then(function() {
 		if ( facilities.length == 0 ) {
