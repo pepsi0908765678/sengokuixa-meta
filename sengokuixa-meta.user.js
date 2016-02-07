@@ -1169,7 +1169,7 @@ getUnitStatus: function( $table ) {
 
 			$this.find('.waitingleader A').each(function() {
 				var card_id = $(this).attr('href').match(/cardWindow_(\d+)/)[ 1 ],
-					$card = $section.find('#cardWindow_' + card_id);
+					$card = $section.parents('#ig_boxInner').find('#cardWindow_' + card_id);
 
 				cards.push( new Card( $card ) );
 			});
@@ -2906,14 +2906,17 @@ var Append = {
 							}
 
 							var postData = {
-								sub_id      : '',
 								base_cid    : remain_page[0].card_id.toInt(),
 								added_cid   : remain_card[0].card_id.toInt(),
-								exec_btn    : 1,
-								union_type  : 5,
-								use_cp_flg  : 0,
 								'material_cid[]': [],
+								use_cp_flg  : 0,
+								union_type  : 5,
+								exec_btn    : 1,
+								sub_id      : '',
+								ad_id       : 25,
 							};
+							// ad_idはイベント期間限定っぽい
+
 							for( var i = 1; i < remain_page.length && i < 5; i++ ) {
 								postData['material_cid[]'].push( remain_page[i].card_id.toInt() );
 							}
@@ -12235,7 +12238,7 @@ analyzeSmall: function( element ) {
 	else { // 11章～
 		// 討伐ゲージ
 		this.battleGage = 0;
-		text = $elem.find('.edit_soldier_wrap .right_block .deck_section:first').text() || '';
+		text = $elem.find('.battle .gauge_wrap').text() || '';
 		array = text.match(/(\d+) \/ \d+/);
 		if( array != null ) { this.battleGage = array[ 1 ]; }
 		// 配置不可に関しては ('$btn_gounit_'+this.cardId).data()で理由を取得可能
