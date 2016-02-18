@@ -2913,7 +2913,7 @@ var Append = {
 								union_type  : 5,
 								exec_btn    : 1,
 								sub_id      : '',
-								ad_id       : 25,
+								// ad_id       : 25,
 							};
 							// ad_idはイベント期間限定っぽい
 
@@ -2947,7 +2947,7 @@ var Append = {
 			// ブラックリスト
 			Deck.filter.exceptions = {};
 
-			// 小姓の隠し玉(6702)/小姓の応援(6703)(6706)(6707)
+			// 小姓の隠し玉(6702)/小姓の応援(6703)(6706)(6707)(6708)
 			var pagelist = [];
 
 			Deck.filter.conditions = [];
@@ -2968,6 +2968,8 @@ var Append = {
 
 			Deck.filter.conditions = [];
 			Deck.filter.conditions.push( { condition: ['cardNo', 6707] } );
+			Deck.filter.conditions = [];
+			Deck.filter.conditions.push( { condition: ['cardNo', 6708] } );
 
 			pagelist = pagelist.concat( Deck.targetList() );
 
@@ -12554,17 +12556,21 @@ layouterSmall: function( unit ) {
 			$div.eq( 2 ).empty().append( $a.get().reverse() );
 		}
 		else { // 11章～
-			//編成ボタン、配置ボタンの順にする、兵数アンカは消す
-			html = `<img alt="選択中の部隊へ" src="${Env.externalFilePath}/img/deck/btn_gounit.png">`;
-			$a = $div.eq( 2 ).addClass('imc_button_container').find('A');
-			// $a: [0]兵編成 [1]兵数 [2]gounit
-			if( this.gounit ) {
-				$div.eq( 2 ).empty().append( $a.eq(0), $a.eq(2).html( html ) );
+			// $a = $div.eq( 2 ).addClass('imc_button_container').find('.control_soldier_wrap A');
+			$a = $div.eq( 2 ).addClass('imc_button_container').find('.control_soldier_wrap A.off').hide()
+				.end().find('.control_soldier_wrap A');
+			$div.eq( 2 ).empty().append( $a.get().reverse() );
+		// 	//編成ボタン、配置ボタンの順にする、兵数アンカは消す
+		// 	html = `<img alt="選択中の部隊へ" src="${Env.externalFilePath}/img/deck/btn_gounit.png">`;
+		// 	$a = $div.eq( 2 ).addClass('imc_button_container').find('A');
+		// 	// $a: [0]兵編成 [1]兵数 [2]gounit
+		// 	if( this.gounit ) {
+		// 		$div.eq( 2 ).empty().append( $a.eq(0), $a.eq(2).html( html ) );
+		// 	}
+		// 	else {
+		// 		$div.eq( 2 ).empty().append( $a.eq(0) );
+		// 	}
 			}
-			else {
-				$div.eq( 2 ).empty().append( $a.eq(0) );
-			}
-		}
 	}
 	$div.eq( 2 ).css({ height: '29px', lineHeight: '29px' }).append( $input );
 
