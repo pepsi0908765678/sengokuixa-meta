@@ -11829,7 +11829,7 @@ skillLevelup: function( card_id, added_cid, material_cid ) {
 //.. skillLevelupSeq  .. スキル連続強化
 skillLevelupSeq: function( card_id, added_cid, material_cid ) {
 	var postData = {
-		// ad_id               : 24,
+		// ad_id               : 28,
 		add_flg             : '',
 		base_cid            : card_id.toInt(),
 		btn_change_flg      : '',
@@ -17263,7 +17263,7 @@ sendAll: function() {
 	});
 
 	function sendData() {
-		var $this = $(this).attr('checked', true),
+		var $this = $(this).prop('checked', true),
 			post_data = $('#input_troop').serialize() + '&btn_preview=true',
 			unit_name = $this.closest('TBODY').find('.waitingunittitle').text().replace(/（部隊スキルあり）/, ''),
 			id = $this.val();
