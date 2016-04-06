@@ -16138,7 +16138,7 @@ else if( Env.chapter < 11 ) {
 				options.push('<option value="' + maxnum + '" style="color: ' + color + '">' + maxnum + '</option>');
 				maxnum = Number.MAX_VALUE;
 			}
-			if ( val > overnum ) { val = overnum; }
+			if ( val > overnum ) { val = overnum; unit_value = overnum; }
 			if ( val >= 1000 ) { step = 500; }
 
 			let result = Util.checkExchange( resource, Util.getConsumption( materials, val ) );
@@ -16239,7 +16239,7 @@ else { // 11章
 				options.push('<option value="' + maxnum + '" style="color: ' + color + '">' + maxnum + '</option>');
 				maxnum = Number.MAX_VALUE;
 			}
-			if ( val > overnum ) { val = overnum; }
+			if ( val > overnum ) { val = overnum; unit_value = overnum; }
 			if ( val >= 1000 ) { step = 500; }
 
 			let result = Util.checkExchange( resource, Util.getConsumption( materials, val ) );
@@ -16334,10 +16334,10 @@ gradeupPulldown: function( $div ) {
 			//必要資源取得（金山効果は込）
 			$tr = $(this).find('TR').eq( 0 );
 			materials = [
-				$tr.find('.icon_wood').text().match(/(\d+)/)[ 1 ].toInt(),
-				$tr.find('.icon_cotton').text().match(/(\d+)/)[ 1 ].toInt(),
-				$tr.find('.icon_iron').text().match(/(\d+)/)[ 1 ].toInt(),
-				$tr.find('.icon_food').text().match(/(\d+)/)[ 1 ].toInt()
+				$tr.find('.icon_wood').text().match(/(-?\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_cotton').text().match(/(-?\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_iron').text().match(/(-?\d+)/)[ 1 ].toInt(),
+				$tr.find('.icon_food').text().match(/(-?\d+)/)[ 1 ].toInt()
 			];
 
 			var rate = ( market ) ? market.rate : 0,
