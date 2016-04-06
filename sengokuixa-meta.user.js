@@ -22655,7 +22655,8 @@ getDetail: function() {
 
 			// メッセージ本文中の座標っぽいものをリンクにする
 			$html.find('.comment_wbr').each( function() {
-				$(this).html( $(this).html().replace( /\(?\s?(-?\d+)[，,.]\s*(-?\d+)\s?\)?/g, replacer ) );
+				$(this).html( $(this).html().replace( /<wbr>/g, '') );
+				$(this).html( $(this).html().replace( /(-?\d+)[，,.]\s*(-?\d+)/g, replacer ) );
 			});
 
 			$('#imi_message_detail')
@@ -22675,7 +22676,7 @@ getDetail: function() {
 	return false;
 
 	function replacer( str, m1, m2 ) {
-		return '<a class="ime_coord imc_coord" x="' + m1 + '" y="' + m2 + '" href="/map.php?x=' + m1 + '&y=' + m2 + '">' + str + '</a>';
+		return `<a class="ime_coord imc_coord" href="/map.php?x=${m1}&y=${m2}">${str}</a>`;
 	}
 },
 
