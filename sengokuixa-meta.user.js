@@ -19847,7 +19847,7 @@ style: '' +
 '.imc_command SPAN { margin: 0px 2px; padding: 2px 4px; border-radius: 5px; cursor: pointer; }' +
 '.imc_command SPAN:hover { color: #fff; background-color: #09f; }' +
 
-'#imi_fvt_right { float: right; width: 252px; }' +
+'#imi_fvt_right { float: right; width: 270px; }' +
 '#imi_fvt_right LI { padding: 3px 5px; border-bottom: solid 1px #cc9; margin-bottom: 3px; font-size: 12px; text-align: left; }' +
 '#imi_fvt_right LI INPUT { display: inline-block; width: 192px; }' +
 '#imi_fvt_right LI .imc_command { width: 48px; }' +
@@ -20036,7 +20036,7 @@ dialogFavoriteEdit: function() {
 
 	options = {
 		title: '検索条件編集',
-		width: 584, height: 505, top: 30,
+		width: 600, height: 505, top: 30,
 		content: $content,
 		buttons: {
 			'インポート': function() {
