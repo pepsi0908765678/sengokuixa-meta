@@ -2947,30 +2947,20 @@ var Append = {
 			// ブラックリスト
 			Deck.filter.exceptions = {};
 
-			// 小姓の隠し玉(6702)/小姓の応援(6703)(6706)(6707)(6708)
+			// 小姓の隠し玉/小姓の応援/高橋Ｐ
 			var pagelist = [];
 
 			Deck.filter.conditions = [];
 			Deck.sort.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6702] } );
 
+			Deck.filter.conditions = [];
+			Deck.filter.conditions.push( { condition: ['name', '小姓の隠し玉'] } );
 			pagelist = pagelist.concat( Deck.targetList() );
-
 			Deck.filter.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6703] } );
-
+			Deck.filter.conditions.push( { condition: ['name', '小姓の応援'] } );
 			pagelist = pagelist.concat( Deck.targetList() );
-
 			Deck.filter.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6706] } );
-
-			pagelist = pagelist.concat( Deck.targetList() );
-
-			Deck.filter.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6707] } );
-			Deck.filter.conditions = [];
-			Deck.filter.conditions.push( { condition: ['cardNo', 6708] } );
-
+			Deck.filter.conditions.push( { condition: ['name', '高橋Ｐ'] } );
 			pagelist = pagelist.concat( Deck.targetList() );
 
 			// 一般武将
