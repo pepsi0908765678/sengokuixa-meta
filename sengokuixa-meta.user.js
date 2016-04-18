@@ -916,8 +916,24 @@ getVillageList: function() {
 		});
 
 		MetaStorage('VILLAGE').set('list', list);
-	});
 
+		// 同盟陣 / β鯖
+		if( Env.world == 'y000' ) {
+			var $alliance = $('.basename.alliance_territory');
+			if( $alliance.length ) {
+				let $a = $alliance.find('LI').first();
+				list.push({
+					type: '同盟陣',
+					id  : $a.data('village_id'),
+					name: $a.children('SPAN,A').text(),
+					x   : $a.data('village_x'),
+					y   : $a.data('village_y'),
+					country:  $a.data('village_c'),
+					fall: false
+				});
+			}
+		}
+	});
 	return list;
 },
 
@@ -1111,6 +1127,18 @@ getUnitStatus: function( $table ) {
 				startx  = startpoint[ 1 ].toInt();
 				starty  = startpoint[ 2 ].toInt();
 			}
+			// 所属拠点がない場合は加勢(or強襲)
+			else {
+				let $ar_en = $panel.find('TR').first().find('IMG').first();
+				// 強襲
+				if( $ar_en.attr('src').indexOf('_encount.png') != -1 ) {
+					base1 = '強襲専用'
+				}
+				// 加勢
+				else {
+					base1 = '加勢専用'
+				}
+			}
 
 			$a2 = $panel.find('TR:eq(2) TD:eq(1) A:eq(0)');
 			if ( $a2.length != 0 ) {
@@ -1161,8 +1189,13 @@ getUnitStatus: function( $table ) {
 				mode = '待機';
 			}
 			else {
-				//modeが取得できない時は加勢待機中（IMGタグではなくcssのbackgroundを使用している為）
-				mode = '加待';
+				if( $this.find('TR:eq(1) TD:eq(1) .ig_fight_status_meeting_hastext').length ) {
+					mode = '合流';
+				}
+				else {
+					//modeが取得できない時は加勢待機中（IMGタグではなくcssのbackgroundを使用している為）
+					mode = '加待';
+				}
 			}
 
 			list.push({ name: name, mode: mode, base: base1, target: target, arrival: arrival, sx: startx, sy: starty, ex: endx, ey: endy, ec: country });
@@ -7566,11 +7599,13 @@ var Map = {
 	//. unitSpeed / 部隊速度
 	unitSpeed: function() {
 		// 各部隊の速度
-		$('.impact_time_text SPAN').map( function() {
-			if( /\d+:\d+:\d+/.test( $(this).text() ) ) {
-				$(this).addClass('imc_arrival');
-			}
-		});
+		$('.table_waigintunit').map( function() {
+			$(this).find('.impact_time_text SPAN').first().map( function() {
+				if( /\d+:\d+:\d+/.test( $(this).text() ) ) {
+					$(this).addClass('imc_arrival');
+				}
+			});
+		})
 		//. Todo
 		// 部隊スキルの設定
 		// 賽の遊軍のON/OFF
@@ -7628,8 +7663,12 @@ var Map = {
 
 		$rows.each( function() {
 			var $this = $(this),
-				$queue = $('[name=queue]', $this ),
-				$last  = $('TD:last', $this);
+				$queue = $('[name=queue]', $this );
+			var $last  = $('TD:last', $this);
+			
+			if( Env.world == 'y000' ) {
+				$last  = $last.prev();
+			}
 
 			html = `<div class="imc_quick" data-queue=${$queue.val()}>即合流</div>`;
 
@@ -13575,10 +13614,19 @@ var SideBar = {
 
 //. init
 init: function() {
+	if( Env.world != 'y000' ) {
 	$('#sideboxBottom .basename')
 	.eq( 0 ).addClass('imc_basename imc_home').end()
 	.eq( 1 ).addClass('imc_basename imc_away').end()
 	.parent().attr('id', 'imi_basename');
+	}
+	else {
+	var $basename = $('#sideboxBottom .basename');
+	$basename.filter('.alliance_territory').addClass('imc_basename imc_alliance');
+	$basename.filter('.my_country').addClass('imc_basename imc_home');
+	$basename.filter('.other_country').addClass('imc_basename imc_away');
+	$basename.parent().attr('id', 'imi_basename');
+	}
 },
 
 //. setup
@@ -13782,7 +13830,8 @@ loadUnit: function() {
 
 	for( var i = 0, len = list.length; i < len; i++ ) {
 		let base = list[ i ],
-			basename = ( base.mode == '加待' ) ? base.target : ( base.base ) ? base.base: '加勢専用';
+			// basename = ( base.mode == '加待' ) ? base.target : ( base.base ) ? base.base: '加勢専用';
+			basename = ( base.mode == '加待' ) ? base.target : base.base;
 
 		if ( !result[ basename ] ) { result[ basename ] = []; }
 		result[ basename ].push([ base.arrival, base.name, base.mode, i, base.ex, base.ey, base.ec ]);
