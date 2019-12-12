@@ -3,7 +3,7 @@
 // @description    戦国IXAを変態させるツール
 // @version        1.6.2.1
 // @namespace      sengokuixa-meta
-// @include        http://*.sengokuixa.jp/*
+// @include        https://*.sengokuixa.jp/*
 // @require        https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js
 // @website        https://github.com/moonlit-g/sengokuixa-meta
 // @updateURL      https://raw.githubusercontent.com/moonlit-g/sengokuixa-meta/master/sengokuixa-meta.meta.js
@@ -17,7 +17,7 @@
 
 音素材は下記のサイトを利用しています
 ポケットサウンド様
-http://pocket-se.info/
+https://pocket-se.info/
 
 */
 
@@ -2948,13 +2948,13 @@ var Append = {
 								sub_id      : '',
 								// ad_id       : 25,
 							};
-							// ad_idはイベント期間限定っぽい
+							// ad_id= ’20191101’
 
 							for( var i = 1; i < remain_page.length && i < 5; i++ ) {
 								postData['material_cid[]'].push( remain_page[i].card_id.toInt() );
 							}
 
-							$.post('/union/union_levelup.php', postData )
+							$.post('/union/special_execute.php', postData )
 							.then( function( html ) {
 								var $html = $(html);
 								msg.message( $html.find('.common_box3bottom P:first').text() );
@@ -3101,7 +3101,8 @@ var Append = {
 
 				var row = '' +
 				'<tr>' +
-				'<td>' + '<input type="checkbox" name="union_card_arr[]"  value="' + this.cardId + '">' + '</td>' +
+				'<td>' + '<input type="checkbox" name="union_card_arr[]" value="' + this.cardId+ '" checked>' + '</td>' +
+
 				'<td class=left>' +
 					'<img width="30" height="30" class="middle mr5" alt="' + this.rarity + '" src="' + Env.externalFilePath + '/img/card/icon/' + icon + '">' +
 					this.name +
